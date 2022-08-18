@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+    parameters {
+            string(name: 'APP_ENV', defaultValue: 'DEV')
+            //string(name: 'SELENIUM_HUB_URL', defaultValue: 'dfss')
+            //string(name: 'TEST_KEY', defaultValue: 'BACBPI-139')
+             // string(name: 'REPORT_FILE', defaultValue: 'target/cucumber.json')
+
+      }
+    stages {
+    stage('get_features'){
+        steps {
+            echo APP_ENV
+        }
+    }
+        stage('Run_Test_UI') {
+            steps {
+                bat '''
+                    mvn test -Dtest=Run
+                    '''
+            }
+        }
+
+        stage('Update_Xray') {
+            steps {
+
+                bat ''' cd target\\reports
+                curl -k -H "Content-Type: application/json" -X POST -H "Authorization: Bearer "${XRAY_TOKEN}""  --data @"Cucumber.json" https://xray.cloud.getxray.app/api/v1/import/execution/cucumber
+                '''
+            }
+        }
+    }
+}
